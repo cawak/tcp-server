@@ -29,9 +29,12 @@ public class ServerHandlerImpl implements ServerHandler {
         ) {
             while (server.isConnected()) {
                 String line = fromClient.readUTF();
-                handlerFactory.getHandler("Demo").handle(line);
-                toClient.writeUTF("Thank you for connecting to " + server.getLocalSocketAddress() + "\n");
-                toClient.flush();
+
+                int indexOfCommand = line.trim().indexOf(" ");
+                if (indexOfCommand > 0){
+                    String command = line.substring(0, indexOfCommand);
+                    handlerFactory.getHandler(command).handle(line.substring(indexOfCommand).trim(), toClient);
+                }
             }
         } catch (Exception e) {
             System.out.println("Got an exception in handler " + Thread.currentThread().getName());

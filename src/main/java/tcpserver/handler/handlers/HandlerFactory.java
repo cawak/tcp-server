@@ -29,6 +29,12 @@ public class HandlerFactory implements ApplicationContextAware, InitializingBean
     }
 
     public Handler getHandler(String type){
-        return requestHandlers.get(type);
+        Handler handler = requestHandlers.get(type);
+
+        if (handler == null){
+            handler = requestHandlers.get("Default");
+        }
+
+        return handler;
     }
 }
