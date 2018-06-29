@@ -15,6 +15,14 @@ public class CacheKey {
         this.valueType = valueType;
     }
 
+    public String getKey() {
+        return key;
+    }
+
+    public boolean isPattern(){
+        return ValueType.PATTERN == this.valueType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

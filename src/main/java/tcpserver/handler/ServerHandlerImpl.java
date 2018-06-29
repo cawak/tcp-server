@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.time.LocalDateTime;
 
 @Component
 public class ServerHandlerImpl implements ServerHandler {
@@ -20,7 +21,7 @@ public class ServerHandlerImpl implements ServerHandler {
     @Override
     @Async("tcpServerHandler")
     public void handle(Socket server){
-        System.out.println(Thread.currentThread().getName() + " handling client " + server.getRemoteSocketAddress());
+        System.out.println(LocalDateTime.now() + ": " + Thread.currentThread().getName() + " handling client " + server.getRemoteSocketAddress());
 
         try (   OutputStream outputStream = server.getOutputStream();
                 DataOutputStream toClient = new DataOutputStream(outputStream);
@@ -31,10 +32,16 @@ public class ServerHandlerImpl implements ServerHandler {
                 String line = fromClient.readUTF();
 
                 int indexOfCommand = line.trim().indexOf(" ");
+                String command = line.trim();
+                String lineToHandle = command;
                 if (indexOfCommand > 0){
-                    String command = line.substring(0, indexOfCommand);
-                    handlerFactory.getHandler(command).handle(line.substring(indexOfCommand).trim(), toClient);
+                    command = line.substring(0, indexOfCommand);
+                    lineToHandle = line.substring(indexOfCommand).trim();
                 }
+
+                handlerFactory.getHandler(command).handle(lineToHandle, toClient);
+                outputStream.flush();
+
             }
         } catch (Exception e) {
             System.out.println("Got an exception in handler " + Thread.currentThread().getName());

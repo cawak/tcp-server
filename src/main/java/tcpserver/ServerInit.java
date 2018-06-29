@@ -21,7 +21,7 @@ public class ServerInit {
                         System.out.println("Waiting for client on port " + serverSocket.getLocalPort() + "...");
 
                         Socket server = serverSocket.accept();
-                        server.setSoTimeout(60_000);
+                        //server.setSoTimeout(60_000);
                         serverHandler.handle(server);
 
                     } catch (Exception e) {

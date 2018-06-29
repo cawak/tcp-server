@@ -6,7 +6,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 @Component
-public class DemoHandler implements Handler {
+class DefaultHandler implements Handler {
 
     @Override
     public void handle(String data, DataOutputStream dataOutputStream) throws IOException{
