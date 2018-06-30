@@ -25,14 +25,14 @@ public class HandlerFactory implements ApplicationContextAware, InitializingBean
     public void afterPropertiesSet() throws Exception {
         requestHandlers = new HashMap<>();
         Collection<Handler> handlerBeans = applicationContext.getBeansOfType(Handler.class).values();
-        handlerBeans.forEach(bean -> requestHandlers.put(bean.getApi(), bean));
+        handlerBeans.forEach(bean -> requestHandlers.put(bean.getType().getType(), bean));
     }
 
     public Handler getHandler(String type){
         Handler handler = requestHandlers.get(type);
 
         if (handler == null){
-            handler = requestHandlers.get("Default");
+            handler = requestHandlers.get(HandlerType.Default.getType());
         }
 
         return handler;

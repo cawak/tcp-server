@@ -7,7 +7,8 @@ import java.util.List;
 public interface KeyValueCache {
 
     void set(String key, ValueType valueType, List<String> values);
-    void addValueTo(String key, ValueType valueType, String value);
+    void addValueToKeyFromRight(String key, String value);
+    void addValueToKeyFromLeft(String key, String value);
     List<String> getByKeyAndType(String key, ValueType valueType);
 
 }

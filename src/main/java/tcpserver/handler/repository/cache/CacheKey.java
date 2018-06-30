@@ -2,7 +2,7 @@ package tcpserver.handler.repository.cache;
 
 import tcpserver.handler.repository.ValueType;
 
-public class CacheKey {
+class CacheKey {
 
     private String key;
     private ValueType valueType;

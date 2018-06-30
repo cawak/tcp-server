@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import tcpserver.handler.repository.ValueType;
 
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Component
 public class KeyValueCacheImpl implements KeyValueCache {
@@ -15,6 +17,21 @@ public class KeyValueCacheImpl implements KeyValueCache {
 
     private final OrderedMap<CacheKey, List<String>> cacheContainer = new LinkedMap<>();
     private final Set<String> patterns = new HashSet<>();
+
+    private enum Direction {
+        LEFT(true),
+        RIGHT(false);
+
+        private boolean isLeft;
+
+        Direction(boolean isLeft){
+            this.isLeft = isLeft;
+        }
+
+        public boolean isLeft(){
+            return isLeft;
+        }
+    }
 
     public KeyValueCacheImpl() {
     }
@@ -26,19 +43,47 @@ public class KeyValueCacheImpl implements KeyValueCache {
         cacheContainer.put(new CacheKey(key, valueType), values);
         if (cacheKeyToAdd.isPattern()){
             patterns.add(key);
+        } else {
+            addKeyToExistingPattern(key);
         }
     }
 
-    public void addKeyToExistingPattern(String key){
-        /*
-            something with patterns set - iterate over it and for each matching pattern add the value to the same
-            key-pattern in cache to its list.
-         */
+    /*public void setPattern(String patter, List<String> values){
+
+    }*/
+
+    @Override
+    public void addValueToKeyFromRight(String key, String value){
+        addValueTo(key, value, Direction.RIGHT);
     }
 
     @Override
-    public void addValueTo(String key, ValueType valueType, String value){
-        CacheKey cacheKey = new CacheKey(key, valueType);
+    public void addValueToKeyFromLeft(String key, String value){
+        addValueTo(key, value, Direction.LEFT);
+    }
+
+    private void addKeyToExistingPattern(String key){
+        Set<String> matchingPatterns = patterns.stream().filter(pattern -> {
+            Pattern p = Pattern.compile(pattern);
+            return p.matcher(key).matches();
+        }).collect(Collectors.toSet());
+
+        matchingPatterns.forEach(matchingPattern -> {
+            addValueToPattern(matchingPattern, ValueType.PATTERN, key);
+        });
+    }
+
+    private void addValueToPattern(String pattern, ValueType valueType, String key){
+        CacheKey cacheKey = new CacheKey(pattern, valueType);
+
+        List<String> values = cacheContainer.get(cacheKey);
+        if (values != null && !values.contains(key)){
+            values.add(key);
+        }
+    }
+
+    private void addValueTo(String key, String value, Direction direction){
+        CacheKey cacheKey = new CacheKey(key, ValueType.KEY);
 
         List<String> values = cacheContainer.get(cacheKey);
         if (values == null){
@@ -46,7 +91,11 @@ public class KeyValueCacheImpl implements KeyValueCache {
             values = new ArrayList<>(Collections.singleton(value));
             cacheContainer.put(cacheKey, values);
         } else {
-            values.add(value);
+            if (direction.isLeft()){
+                values.add(0,value);
+            } else {
+                values.add(value);
+            }
         }
     }
 

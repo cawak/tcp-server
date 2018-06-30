@@ -15,7 +15,7 @@ class DefaultHandler implements Handler {
     }
 
     @Override
-    public String getApi() {
-        return "Default";
+    public HandlerType getType() {
+        return HandlerType.Default;
     }
 }
