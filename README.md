@@ -1,23 +1,22 @@
 # tcp-server
 tcp-server
 
-This is a sample tcp-server
-
-
+This is a sample tcp-server<br>
 You must have the following software installed:
 1. java 8 - http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 2. maven - https://maven.apache.org/install.html
 3. mongodb -
 In order to use persistence you need to have a mongodb installed on your local machine with the following configurations:
+<pre>
 database name: testserver
 user: user
 password: password
 port: 27017 (default)
+</pre><br>
 
-Here is the full shell command:
-
+Here is the full shell command:<br>
+<pre>
 use testserver
-
 db.createUser(
 {
      user: "user",
@@ -25,7 +24,7 @@ db.createUser(
      roles: [ "readWrite", "dbAdmin" ]
    }
 )
-
+</pre>
 
 It’s API includes:
 • getAllKeys(String pattern) – Returns all keys matching pattern - the pattern should be started with ^ and ended with $.
@@ -34,28 +33,19 @@ It’s API includes:
 • set(String K, List<String> V)
 • get(String K) – gets a list by its key
 
+<pre>
 For example (write in client console):
-
 set a [1,2,3] -> void
-
 get a -> [1,2,3]
-
 set b [1]
-
 rightAdd b 2
-
 get b -> [1,2]
-
 set alex [1,2]
-
 get alex -> [1,2]
-
 getAllKeys ^a(.)*$ -> [a, alex]
-
 set a []
-
 getAllKeys ^a(.)*$ -> [alex]
-
+</pre><br>
 
 In order to build the project (here the example is for tcp-server, but the same applies for the tcpclient):
 1. Go to main folder 
