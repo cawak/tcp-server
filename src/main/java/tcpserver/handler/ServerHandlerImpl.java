@@ -39,8 +39,9 @@ public class ServerHandlerImpl implements ServerHandler {
                     lineToHandle = line.substring(indexOfCommand).trim();
                 }
 
-                handlerFactory.getHandler(command).handle(lineToHandle, toClient);
-                outputStream.flush();
+                String handlerMessage = handlerFactory.getHandler(command).handle(lineToHandle);
+                toClient.writeUTF(handlerMessage + System.lineSeparator());
+                toClient.flush();
 
             }
         } catch (Exception e) {

@@ -15,22 +15,21 @@ class GetAllKeysHandler implements Handler {
     @Autowired
     private KeyValueRepository keyValueRepository;
 
-    @Autowired
-    private ErrorHandler errorHandler;
-
     @Override
-    public void handle(String pattern, DataOutputStream dataOutputStream) throws IOException {
-        String errorMessage = "getAllKeys: Wrong string pattern!";
+    public String handle(String pattern) throws IOException {
+        String returnMessage;
         if (!pattern.startsWith("^") || !pattern.endsWith("$")){
-            errorHandler.handle(dataOutputStream, errorMessage);
-            return;
+            returnMessage = "getAllKeys: Wrong string pattern!";
+        } else {
+            try {
+                List<String> keys = keyValueRepository.getAllKeysByPattern(pattern);
+                returnMessage = keys.toString();
+            } catch (Exception e) {
+                System.out.println("Got an exception while processing getAllKeys: " + e);
+                returnMessage = "Something is wrong with the arguments.";
+            }
         }
-        try {
-            List<String> keys = keyValueRepository.getAllKeysByPattern(pattern);
-            dataOutputStream.writeUTF(keys.toString() + System.lineSeparator());
-        } catch (Exception e){
-            errorHandler.handle(dataOutputStream, errorMessage);
-        }
+        return returnMessage;
     }
 
     @Override

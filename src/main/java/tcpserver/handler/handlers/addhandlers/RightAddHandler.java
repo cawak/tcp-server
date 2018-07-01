@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tcpserver.handler.handlers.Handler;
 import tcpserver.handler.handlers.HandlerType;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 @Component
@@ -14,8 +13,8 @@ class RightAddHandler implements Handler {
     private AddHandler addHandler;
 
     @Override
-    public void handle(String data, DataOutputStream dataOutputStream) throws IOException {
-        addHandler.handle(data, dataOutputStream, getAddType());
+    public String handle(String data) throws IOException {
+        return addHandler.handle(data, getAddType());
     }
 
     @Override

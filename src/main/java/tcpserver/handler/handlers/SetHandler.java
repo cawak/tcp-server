@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tcpserver.handler.repository.KeyValueRepository;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,26 +16,26 @@ class SetHandler implements Handler {
     @Autowired
     private KeyValueRepository keyValueRepository;
 
-    @Autowired
-    private ErrorHandler errorHandler;
-
     @Override
-    public void handle(String data, DataOutputStream dataOutputStream) throws IOException {
+    public String handle(String data) throws IOException {
+        String message = null;
         if (data == null || !data.contains(" ")){
-            this.errorHandler(dataOutputStream);
+            message = "Got empty or wrong format set command arguments";
         } else {
             try {
                 int splitIndex = data.indexOf(" ");
                 Pair<String, String> command = Pair.of(data.substring(0, splitIndex), data.substring(splitIndex + 1));
                 String key = command.getLeft();
-                List<String> values = parseStringToList(command.getRight(), dataOutputStream);
+                List<String> values = parseStringToList(command.getRight());
                 this.storeInDb(key, values);
-                dataOutputStream.writeUTF("Value with key: " + key + " was successfully set." + System.lineSeparator());
-                dataOutputStream.flush();
-            } catch (IOException e) {
-                this.errorHandler(dataOutputStream);
+                message = "Value with key: " + key + " was successfully set.";
+            } catch (Exception e) {
+                System.out.println("Got an exception while processing set. " + e);
+                message = "Something is wrong with the arguments.";
             }
         }
+
+        return message;
     }
 
     @Override
@@ -43,9 +43,9 @@ class SetHandler implements Handler {
         return HandlerType.Set;
     }
 
-    private List<String> parseStringToList(String string, DataOutputStream dataOutputStream) throws IOException {
+    private List<String> parseStringToList(String string) throws ParseException {
         if (!string.startsWith("[") || !string.endsWith("]")){
-            this.errorHandler(dataOutputStream);
+            throw new ParseException("No colons at the beginning", 0);
         }
 
         String formattedList = string.substring(1, string.length()-1);
@@ -57,11 +57,6 @@ class SetHandler implements Handler {
                     .collect(Collectors.toCollection(LinkedList::new));
         }
         return list;
-    }
-
-    private void errorHandler(DataOutputStream dataOutputStream) throws IOException {
-        String errMsg = "Got empty or wrong format set command arguments" + System.lineSeparator();
-        errorHandler.handle(dataOutputStream, errMsg);
     }
 
     private void storeInDb(String key, List<String> values){

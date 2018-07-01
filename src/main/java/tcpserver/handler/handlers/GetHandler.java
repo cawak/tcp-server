@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import tcpserver.handler.repository.KeyValueRepository;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -14,26 +12,22 @@ class GetHandler implements Handler {
     @Autowired
     private KeyValueRepository keyValueRepository;
 
-    @Autowired
-    private ErrorHandler errorHandler;
-
     @Override
-    public void handle(String key, DataOutputStream dataOutputStream) throws IOException {
+    public String handle(String key) {
+        String message = null;
         if (key == null || key.isEmpty()){
-            handleError(dataOutputStream);
+            message = "Got wrong get command arguments.";
         } else {
             try {
-                List<String> value = keyValueRepository.getByKey(key);
-                dataOutputStream.writeUTF(value.toString() + System.lineSeparator());
-                dataOutputStream.flush();
-            } catch (IOException e) {
-                handleError(dataOutputStream);
+                List<String> values = keyValueRepository.getByKey(key);
+                message = values.toString();
+            } catch (Exception e) {
+                System.out.println("Got an exception while processing get. " + e);
+                message = "Something is wrong with the get arguments.";
             }
         }
-    }
 
-    private void handleError(DataOutputStream dataOutputStream){
-        errorHandler.handle(dataOutputStream, "Got wrong get command arguments." + System.lineSeparator());
+        return message;
     }
 
     @Override

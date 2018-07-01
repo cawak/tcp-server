@@ -77,9 +77,6 @@ public class KeyValueRepositoryImpl implements KeyValueRepository {
     @Override
     public void addValueToKeyFromRight(String key, String value){
         lock.writeLock().lock();
-        boolean isWriteLockReleased = false;
-
-        //new Update().push("hi").atPosition(0).value(new Object());
 
         try{
             mongoTemplate.updateFirst(
@@ -90,22 +87,16 @@ public class KeyValueRepositoryImpl implements KeyValueRepository {
             if (this.keyValueCache.getByKeyAndType(key, ValueType.KEY) != null){
                 keyValueCache.addValueToKeyFromRight(key, value);
             } else {
-                lock.writeLock().unlock();
-                isWriteLockReleased = true;
-                this.get(key);
+                this.getKeyQuery();
             }
         } finally {
-            if (!isWriteLockReleased) {
-                lock.writeLock().unlock();
-            }
+            lock.writeLock().unlock();
         }
     }
 
+    @Override
     public void addValueToKeyFromLeft(String key, String value){
         lock.writeLock().lock();
-        boolean isWriteLockReleased = false;
-
-        //new Update().push("hi").atPosition(0).value(new Object());
 
         try{
             mongoTemplate.updateFirst(
@@ -116,32 +107,31 @@ public class KeyValueRepositoryImpl implements KeyValueRepository {
             if (this.keyValueCache.getByKeyAndType(key, ValueType.KEY) != null){
                 keyValueCache.addValueToKeyFromLeft(key, value);
             } else {
-                lock.writeLock().unlock();
-                isWriteLockReleased = true;
-                this.get(key);
+                this.getKeyQuery();
             }
         } finally {
-            if (!isWriteLockReleased) {
-                lock.writeLock().unlock();
-            }
+            lock.writeLock().unlock();
         }
     }
 
-    private List<String> get(String key){
-        Function<String, List<String>> dbQuery =
-                (String key1) -> {
-                    KeyValue keyValue = keyValueMongoRepository.findByKey(key1);
-                    List<String> values;
-                    if (keyValue == null || keyValue.getValues() == null) {
-                        values = new ArrayList<>();
-                    } else {
-                        values = keyValue.getValues();
-                        keyValueCache.set(keyValue.getKey(), ValueType.KEY, keyValue.getValues());
-                    }
-                    return values;
-                };
+    private Function<String, List<String>> getKeyQuery(){
+        return (String key1) -> {
+            KeyValue keyValue = keyValueMongoRepository.findByKey(key1);
+            List<String> values;
+            if (keyValue == null || keyValue.getValues() == null) {
+                values = new ArrayList<>();
+            } else {
+                values = keyValue.getValues();
+                keyValueCache.set(keyValue.getKey(), ValueType.KEY, keyValue.getValues());
+            }
+            return values;
+        };
+    }
 
-        return get(key, ValueType.KEY, dbQuery);
+    //There is a bug here. Take out the function as a getter and use it in the adders without releasing the write lock
+    //as in the get under this get.
+    private List<String> get(String key){
+        return get(key, ValueType.KEY, getKeyQuery());
     }
 
     private List<String> get(String key, ValueType valueType, Function<String,List<String>> dbQuery){
