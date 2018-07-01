@@ -33,8 +33,8 @@ It’s API includes:
 • set(String K, List<String> V)
 • get(String K) – gets a list by its key
 
-<pre>
 For example (write in client console):
+<pre>
 set a [1,2,3] -> void
 get a -> [1,2,3]
 set b [1]
