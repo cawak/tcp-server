@@ -15,9 +15,11 @@ password: password
 port: 27017 (default)
 
 Here is the full shell command:
+
 use testserver
+
 db.createUser(
-   {
+{
      user: "user",
      pwd: "password",
      roles: [ "readWrite", "dbAdmin" ]
@@ -33,16 +35,27 @@ It’s API includes:
 • get(String K) – gets a list by its key
 
 For example (write in client console):
+
 set a [1,2,3] -> void
+
 get a -> [1,2,3]
+
 set b [1]
+
 rightAdd b 2
+
 get b -> [1,2]
+
 set alex [1,2]
+
 get alex -> [1,2]
+
 getAllKeys ^a(.)*$ -> [a, alex]
+
 set a []
+
 getAllKeys ^a(.)*$ -> [alex]
+
 
 In order to build the project (here the example is for tcp-server, but the same applies for the tcpclient):
 1. Go to main folder 
@@ -50,6 +63,7 @@ In order to build the project (here the example is for tcp-server, but the same 
 3. Run jar in /target java -jar tcp.server-1.0-SNAPSHOT.jar
 
 How did I create the server?
+
 For the server I used java.net.ServerSocket (an implementation of Socket interface) and then I listen to connections from client and then
 send asynchronously to one of its handlers. The server can handle simultaneously up to 2 clients (this was made for testing and can be easily
 modified). I used Spring boot with mongodb started to ease the dependecy management and the object creation.
