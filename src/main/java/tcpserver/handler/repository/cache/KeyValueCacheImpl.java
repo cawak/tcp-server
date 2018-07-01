@@ -40,17 +40,30 @@ public class KeyValueCacheImpl implements KeyValueCache {
     public void set(String key, ValueType valueType, List<String> values){
         this.removeLruIfCacheIsFull();
         CacheKey cacheKeyToAdd = new CacheKey(key, valueType);
-        cacheContainer.put(new CacheKey(key, valueType), values);
+        cacheContainer.put(cacheKeyToAdd, values);
         if (cacheKeyToAdd.isPattern()){
             patterns.add(key);
         } else {
-            addKeyToExistingPattern(key);
+            if (values.isEmpty()){
+                Set<String> matchedPatters = getMatchingPatterns(key);
+                if (matchedPatters != null) {
+                    matchedPatters.forEach(matchingPattern -> {
+                        cacheContainer.get(new CacheKey(matchingPattern, ValueType.PATTERN)).remove(key);
+                    });
+                }
+            } else {
+                addKeyToExistingPattern(key);
+            }
         }
     }
 
-    /*public void setPattern(String patter, List<String> values){
 
-    }*/
+    private Set<String> getMatchingPatterns(String key){
+        return patterns.stream().filter(pattern -> {
+            Pattern p = Pattern.compile(pattern);
+            return p.matcher(key).matches();
+        }).collect(Collectors.toSet());
+    }
 
     @Override
     public void addValueToKeyFromRight(String key, String value){
@@ -63,12 +76,7 @@ public class KeyValueCacheImpl implements KeyValueCache {
     }
 
     private void addKeyToExistingPattern(String key){
-        Set<String> matchingPatterns = patterns.stream().filter(pattern -> {
-            Pattern p = Pattern.compile(pattern);
-            return p.matcher(key).matches();
-        }).collect(Collectors.toSet());
-
-        matchingPatterns.forEach(matchingPattern -> {
+        getMatchingPatterns(key).forEach(matchingPattern -> {
             addValueToPattern(matchingPattern, ValueType.PATTERN, key);
         });
     }

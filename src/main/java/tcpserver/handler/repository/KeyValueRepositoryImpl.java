@@ -79,7 +79,7 @@ public class KeyValueRepositoryImpl implements KeyValueRepository {
         lock.writeLock().lock();
 
         try{
-            mongoTemplate.updateFirst(
+            mongoTemplate.upsert(
                     Query.query(Criteria.where("key").is(key)),
                     new Update().push("values", value),
                     KeyValue.class
@@ -87,7 +87,7 @@ public class KeyValueRepositoryImpl implements KeyValueRepository {
             if (this.keyValueCache.getByKeyAndType(key, ValueType.KEY) != null){
                 keyValueCache.addValueToKeyFromRight(key, value);
             } else {
-                this.getKeyQuery();
+                this.getKeyQuery().apply(key);
             }
         } finally {
             lock.writeLock().unlock();
@@ -99,7 +99,7 @@ public class KeyValueRepositoryImpl implements KeyValueRepository {
         lock.writeLock().lock();
 
         try{
-            mongoTemplate.updateFirst(
+            mongoTemplate.upsert(
                     Query.query(Criteria.where("key").is(key)),
                     new Update().push("values").atPosition(0).value(value),
                     KeyValue.class
@@ -107,7 +107,7 @@ public class KeyValueRepositoryImpl implements KeyValueRepository {
             if (this.keyValueCache.getByKeyAndType(key, ValueType.KEY) != null){
                 keyValueCache.addValueToKeyFromLeft(key, value);
             } else {
-                this.getKeyQuery();
+                this.getKeyQuery().apply(key);
             }
         } finally {
             lock.writeLock().unlock();
