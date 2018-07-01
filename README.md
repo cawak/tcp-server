@@ -1,7 +1,7 @@
 # tcp-server
 tcp-server
 
-This is a sample tcp-server<br>
+This is a sample tcp-server (port 12345) <br>
 You must have the following software installed:
 1. java 8 - http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 2. maven - https://maven.apache.org/install.html
