@@ -12,10 +12,10 @@ database name: testserver
 user: user
 password: password
 port: 27017 (default)
-</pre><br>
-
+</pre>
 Here is the full shell command:<br>
 <pre>
+
 use testserver
 db.createUser(
 {
@@ -45,7 +45,7 @@ get alex -> [1,2]
 getAllKeys ^a(.)*$ -> [a, alex]
 set a []
 getAllKeys ^a(.)*$ -> [alex]
-</pre><br>
+</pre>
 
 In order to build the project (here the example is for tcp-server, but the same applies for the tcpclient):
 1. Go to main folder 
